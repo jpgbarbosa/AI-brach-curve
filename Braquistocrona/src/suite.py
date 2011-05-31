@@ -19,7 +19,6 @@ reps=1
 
 curveFinder = BrachistochroneCurve()
 
-''' NOT WORKING YET '''
 def firstTest():
     global curveFinder
         
@@ -125,6 +124,7 @@ def testPopulationSize():
     finalCurves=[]
     
     for i in vals:
+        print i
         curveFinder.setSizePopulation(i)
         finalCurves.append(testAndReturnVals(s, i))
         
@@ -152,6 +152,7 @@ def testPopulationSize():
         pylab.show()
     else:
         pylab.savefig(s+"/graph.png")
+        pylab.savefig(s+"/graph.svg")
 
 def testNoGens():
     
@@ -198,6 +199,7 @@ def testNoGens():
     elif justShow:
         pylab.show()
     else:
+        pylab.savefig(s+"/graph.png")
         pylab.savefig(s+"/graph.svg")
 
 def testSelection():
@@ -252,6 +254,7 @@ def testSelection():
     elif justShow:
         pylab.show()
     else:
+        pylab.savefig(s+"/graph.png")
         pylab.savefig(s+"/graph.svg")
 
 def testXandY():
@@ -295,6 +298,7 @@ def testXandY():
         pylab.show()
     else:
         pylab.savefig(s+"/graph.png")
+        pylab.savefig(s+"/graph.svg")
 
 def testCrossOverPoints():
     vals = [1,3,5]
@@ -334,6 +338,7 @@ def testCrossOverPoints():
         pylab.show()
     else:
         pylab.savefig(s+"/graph.png")
+        pylab.savefig(s+"/graph.svg")
         
     curveFinder.useCrossOverPercentage = True
 
@@ -373,6 +378,7 @@ def testCrossOverProb():
         pylab.show()
     else:
         pylab.savefig(s+"/graph.png")
+        pylab.savefig(s+"/graph.svg")
 
 def testMutation(useUniform):
     vals = [1,2,5]
@@ -412,6 +418,7 @@ def testMutation(useUniform):
         pylab.show()
     else:
         pylab.savefig(s+"/graph.png")
+        pylab.savefig(s+"/graph.svg")
 
 def testElitism():
     vals = [2,5,10,"Half","Offspring"]
@@ -566,7 +573,36 @@ def setPlotLegendAndRealCurve(tM,tP,n,s):
     pylab.ylabel("Fitness")
     
 '''^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Aux Functions ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'''
-    
-testElitism()
-    
-    
+
+p1 = [[0,50],[1,0]]
+p2 = [[0,1],[50,0]]
+p3 = [[0,10],[10,0]]
+p4 = [[0,20],[20,19]]
+p5 = [[0,20],[20,10]]
+testPoints =[p1,p2,p3,p4,p5] 
+
+reps = 5
+
+for pt in testPoints:
+    curveFinder.hBegin = pt[0]
+    curveFinder.hEnd = pt[1]
+
+    print "populationSize"
+    testPopulationSize()
+    print "noGens"
+    testNoGens()
+    print "testSelection"
+    testSelection()
+    print "XandY"
+    testXandY()
+    print "CrossOverPoints"
+    testCrossOverPoints()
+    print "CrossOverProb"
+    testCrossOverProb()
+    print "testMutationt"
+    testMutation(True) #use UniformMutation
+    print "testMutationF"
+    testMutation(False)
+    print "Elitism" 
+    testElitism()
+    print "end"

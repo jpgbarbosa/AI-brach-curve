@@ -1,0 +1,595 @@
+from BrachFitness import *
+from curva import *
+from realCurve import *
+from math import *
+from matplotlib.font_manager import fontManager, FontProperties
+import json
+import numpy
+import os
+import pylab
+
+global curveFinder, reps
+
+''' show graph and save it to file '''
+showAndPlot = False
+''' just show graphs '''
+justShow = False
+
+reps=1
+
+curveFinder = BrachistochroneCurve()
+
+def firstTest():
+    global curveFinder
+        
+    ''' radio buttons '''
+    curveFinder.useXandY = False
+    curveFinder.eliType = 1
+    curveFinder.useSelectionParents = 1
+    
+    curveFinder.setNumberGenerations(500)
+    curveFinder.setSizePopulation(100)
+    curveFinder.setSizeTournament(5)
+    curveFinder.setNoPoints(13)
+    
+    ''' scales '''
+    curveFinder.setMutationProb(5)
+    curveFinder.setCrossOverProb(70)
+    
+    curveFinder.setCrossOverSizePerc(10)
+    curveFinder.setParentsElitismPerc(5)
+    
+    curveFinder.printPopulation = False
+    curveFinder.plot=False
+    curveFinder.useCrossOverPercentage = True
+    
+    bestFitDiff = ()
+    
+    file=open("diffFits.txt",'w')
+    
+    #for r in xrange(reps):
+    for yS in xrange(1,52,5):
+        for xE in xrange(1,52,5):
+            for yE in xrange(0,yS,5):
+                ''' start and end point '''
+                curveFinder.setEndPoint([xE, yE])
+                curveFinder.setStartPoint([0, yS])
+                #the y coordinate at the start point is still missing
+                for p in xrange(10,31,5):
+                    '''no of points '''
+                    curveFinder.noPoints = p
+                
+                    returnValues = curveFinder.bestCurve()
+                    currFit = returnValues[0]
+                    
+                    #noPoints+inicio+fim-1 -> +2-1 = +1
+                    _,L=brachistochroneReal(0,yS,xE,yE,p+1)
+                    
+                    realFit=calcBrachTime(L)
+                    
+                    df = abs(realFit-currFit)
+                    
+                    file.write( str(df) +"  "+ str(bestFitDiff)+"\n")
+                    
+                    if df < bestFitDiff:
+                        bestFitDiff = df 
+                        #save params
+                        startPoint = [0,yS]
+                        endPoint = [xE,yE]
+                        numberPoints = p
+                        
+                        print str(bestFitDiff)+" -> ", startPoint, endPoint, numberPoints
+                        file.write(str(bestFitDiff)+" -> "+ str(startPoint)+" "+str(endPoint)+" "+ str(numberPoints)+"\n")
+
+                    print yS, xE, yE, p
+             
+    file.close()
+    return startPoint, endPoint, numberPoints             
+    
+def setStandardParameters():
+    global curveFinder
+        
+    ''' radio buttons '''
+    curveFinder.useXandY = False
+    curveFinder.eliType = 1
+    curveFinder.useSelectionParents = 1
+    
+    curveFinder.setNumberGenerations(500)
+    curveFinder.setSizePopulation(100)
+    curveFinder.setSizeTournament(5)
+    
+    ''' scales '''
+    curveFinder.setMutationProb(2)
+    curveFinder.setCrossOverProb(65)
+    curveFinder.setNoPoints(20)
+    
+    curveFinder.setCrossOverSizePerc(10)
+    curveFinder.setParentsElitismPerc(5)
+    
+    curveFinder.setStartPoint([0, 3])
+    curveFinder.setEndPoint([3, 1])
+    curveFinder.plot=False
+    curveFinder.printPopulation = False
+    
+    curveFinder.useCrossOverPercentage = True
+
+'''---------------------- Parameter Test Functions -----------------------------'''
+def testPopulationSize():
+    vals = [50,100,200,500]
+    
+    s="population_size"
+    s=str(curveFinder.hBegin)+"_"+str(curveFinder.hEnd)+"/"+s
+    setStandardParameters()
+    
+    finalCurves=[]
+    
+    for i in vals:
+        curveFinder.setSizePopulation(i)
+        finalCurves.append(testAndReturnVals(s, i))
+        
+    tP = numpy.linspace(0, curveFinder.hEnd[0], num=(curveFinder.noPoints+2))
+    tM = numpy.linspace(1, curveFinder.getNumberGenerations(), num=curveFinder.getNumberGenerations())
+    
+    for i in xrange(len(vals)):
+        pointsCurve = [finalCurves[i][1][f] for f in xrange(1,len(finalCurves[i][1]),2)]
+        pointsMed = [finalCurves[i][2][f] for f in xrange(0,len(finalCurves[i][2]),1)]
+        poinsdPad = [finalCurves[i][3][f] for f in xrange(0,len(finalCurves[i][3]),1)]
+        
+        pylab.subplot(2,2,1)
+        pylab.plot(tP,pointsCurve,label=str(vals[i]))
+        pylab.subplot(2,2,2)
+        pylab.plot(tM,poinsdPad,label=str(vals[i]))
+        pylab.subplot(2,1,2) 
+        pylab.plot(tM,pointsMed,label=str(vals[i]))
+        
+    setPlotLegendAndRealCurve(tM,tP,len(pointsCurve),s)
+    
+    if showAndPlot:
+        pylab.show()
+        pylab.savefig(s+"/graph.png")
+    elif justShow:
+        pylab.show()
+    else:
+        pylab.savefig(s+"/graph.png")
+        pylab.savefig(s+"/graph.svg")
+
+def testNoGens():
+    
+    ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~CHANGE PARAMETERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
+    vals = [10,20,50,100,250,500]
+    s="number_generations"
+    s=str(curveFinder.hBegin)+"_"+str(curveFinder.hEnd)+"/"+s
+    ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~CHANGE PARAMETERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
+    
+    setStandardParameters()
+    
+    finalCurves=[]
+    
+    for i in vals:
+        ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~CHANGE PARAMETERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
+        curveFinder.setNumberGenerations(i)
+        ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~CHANGE PARAMETERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
+        finalCurves.append(testAndReturnVals(s, i))
+        
+    tP = numpy.linspace(0, curveFinder.hEnd[0], num=(curveFinder.noPoints+2))
+    tM = numpy.linspace(1, curveFinder.getNumberGenerations(), num=curveFinder.getNumberGenerations())
+    
+    for i in xrange(len(vals)):
+        pointsCurve = [finalCurves[i][1][f] for f in xrange(1,len(finalCurves[i][1]),2)]
+        pointsMed = [finalCurves[i][2][f] for f in xrange(0,len(finalCurves[i][2]),1)]
+        poinsdPad = [finalCurves[i][3][f] for f in xrange(0,len(finalCurves[i][3]),1)]
+                
+        for _ in xrange(vals[i],curveFinder.getNumberGenerations()):
+            poinsdPad.append(poinsdPad[vals[i]-1])
+            pointsMed.append(pointsMed[vals[i]-1])
+        
+        pylab.subplot(2,2,1)
+        pylab.plot(tP,pointsCurve,label=str(vals[i]))
+        pylab.subplot(2,2,2)
+        pylab.plot(tM,poinsdPad,label=str(vals[i]))
+        pylab.subplot(2,1,2) 
+        pylab.plot(tM,pointsMed,label=str(vals[i]))
+        
+    setPlotLegendAndRealCurve(tM,tP,len(pointsCurve),s)
+    
+    if showAndPlot:
+        pylab.show()
+        pylab.savefig(s+"/graph.svg")
+    elif justShow:
+        pylab.show()
+    else:
+        pylab.savefig(s+"/graph.png")
+        pylab.savefig(s+"/graph.svg")
+
+def testSelection():
+    
+    ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~CHANGE PARAMETERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
+    vals = [2,5,10]  
+    s="Selection"
+    s=str(curveFinder.hBegin)+"_"+str(curveFinder.hEnd)+"/"+s
+    ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~CHANGE PARAMETERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
+
+    setStandardParameters()
+    
+    finalCurves=[]
+    
+    ''' use Tournament '''
+    curveFinder.useSelectionParents = 1
+    for i in vals:
+        ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~CHANGE PARAMETERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
+        curveFinder.setSizeTournament(i)
+        ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~CHANGE PARAMETERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
+        finalCurves.append(testAndReturnVals(s, i))
+    
+    ''' use Roulette '''
+    curveFinder.useSelectionParents = 2
+    finalCurves.append(testAndReturnVals(s, i))
+    
+    tP = numpy.linspace(0, curveFinder.hEnd[0], num=(curveFinder.noPoints+2))
+    tM = numpy.linspace(1, curveFinder.getNumberGenerations(), num=curveFinder.getNumberGenerations())
+    
+    for i in xrange(len(vals)+1):
+        pointsCurve = [finalCurves[i][1][f] for f in xrange(1,len(finalCurves[i][1]),2)]
+        pointsMed = [finalCurves[i][2][f] for f in xrange(0,len(finalCurves[i][2]),1)]
+        poinsdPad = [finalCurves[i][3][f] for f in xrange(0,len(finalCurves[i][3]),1)]        
+        
+        if i == len(vals):
+            cLabel="roulette"
+        else:
+            cLabel=str(vals[i])
+            
+        pylab.subplot(2,2,1)
+        pylab.plot(tP,pointsCurve,label=cLabel)
+        pylab.subplot(2,2,2)
+        pylab.plot(tM,poinsdPad,label=cLabel)
+        pylab.subplot(2,1,2) 
+        pylab.plot(tM,pointsMed,label=cLabel)
+        
+    setPlotLegendAndRealCurve(tM,tP,len(pointsCurve),s)
+    
+    if showAndPlot:
+        pylab.show()
+        pylab.savefig(s+"/graph.png")
+    elif justShow:
+        pylab.show()
+    else:
+        pylab.savefig(s+"/graph.png")
+        pylab.savefig(s+"/graph.svg")
+
+def testXandY():
+    vals = ["Y","XandY"]
+    s="VarX_vs_VarXandY"
+    s=str(curveFinder.hBegin)+"_"+str(curveFinder.hEnd)+"/"+s
+    setStandardParameters()
+    
+    finalCurves=[]
+    
+    var = False
+    
+    for i in vals:
+        
+        curveFinder.useXandY = var
+        var = not var
+        
+        finalCurves.append(testAndReturnVals(s, i))
+        
+    tP = numpy.linspace(0, curveFinder.hEnd[0], num=(curveFinder.noPoints+2))
+    tM = numpy.linspace(1, curveFinder.getNumberGenerations(), num=curveFinder.getNumberGenerations())
+    
+    for i in xrange(len(vals)):
+        pointsCurve = [finalCurves[i][1][f] for f in xrange(1,len(finalCurves[i][1]),2)]
+        pointsMed = [finalCurves[i][2][f] for f in xrange(0,len(finalCurves[i][2]),1)]
+        poinsdPad = [finalCurves[i][3][f] for f in xrange(0,len(finalCurves[i][3]),1)]
+        
+        pylab.subplot(2,2,1)
+        pylab.plot(tP,pointsCurve,label=str(vals[i]))
+        pylab.subplot(2,2,2)
+        pylab.plot(tM,poinsdPad,label=str(vals[i]))
+        pylab.subplot(2,1,2) 
+        pylab.plot(tM,pointsMed,label=str(vals[i]))
+        
+    setPlotLegendAndRealCurve(tM,tP,len(pointsCurve),s)
+    
+    if showAndPlot:
+        pylab.show()
+        pylab.savefig(s+"/graph.png")
+    elif justShow:
+        pylab.show()
+    else:
+        pylab.savefig(s+"/graph.png")
+        pylab.savefig(s+"/graph.svg")
+
+def testCrossOverPoints():
+    vals = [1,3,5]
+    s="CrossOver_Points"
+    s=str(curveFinder.hBegin)+"_"+str(curveFinder.hEnd)+"/"+s
+    setStandardParameters()
+    
+    finalCurves=[]
+    
+    curveFinder.useCrossOverPercentage = False
+    
+    for i in vals:
+        curveFinder.setCrossOverSizePerc(i)
+        finalCurves.append(testAndReturnVals(s, i))
+        
+    tP = numpy.linspace(0, curveFinder.hEnd[0], num=(curveFinder.noPoints+2))
+    tM = numpy.linspace(1, curveFinder.getNumberGenerations(), num=curveFinder.getNumberGenerations())
+    
+    for i in xrange(len(vals)):
+        pointsCurve = [finalCurves[i][1][f] for f in xrange(1,len(finalCurves[i][1]),2)]
+        pointsMed = [finalCurves[i][2][f] for f in xrange(0,len(finalCurves[i][2]),1)]
+        poinsdPad = [finalCurves[i][3][f] for f in xrange(0,len(finalCurves[i][3]),1)]
+        
+        pylab.subplot(2,2,1)
+        pylab.plot(tP,pointsCurve,label=str(vals[i]))
+        pylab.subplot(2,2,2)
+        pylab.plot(tM,poinsdPad,label=str(vals[i]))
+        pylab.subplot(2,1,2) 
+        pylab.plot(tM,pointsMed,label=str(vals[i]))
+        
+    setPlotLegendAndRealCurve(tM,tP,len(pointsCurve),s)
+    
+    if showAndPlot:
+        pylab.show()
+        pylab.savefig(s+"/graph.png")
+    elif justShow:
+        pylab.show()
+    else:
+        pylab.savefig(s+"/graph.png")
+        pylab.savefig(s+"/graph.svg")
+        
+    curveFinder.useCrossOverPercentage = True
+
+def testCrossOverProb():
+    vals = [5,10,50]
+    s="CrossOver_Probability"
+    s=str(curveFinder.hBegin)+"_"+str(curveFinder.hEnd)+"/"+s
+    setStandardParameters()
+    
+    finalCurves=[]
+    
+    for i in vals:
+        curveFinder.setCrossOverProb(i)
+        finalCurves.append(testAndReturnVals(s, i))
+        
+    tP = numpy.linspace(0, curveFinder.hEnd[0], num=(curveFinder.noPoints+2))
+    tM = numpy.linspace(1, curveFinder.getNumberGenerations(), num=curveFinder.getNumberGenerations())
+    
+    for i in xrange(len(vals)):
+        pointsCurve = [finalCurves[i][1][f] for f in xrange(1,len(finalCurves[i][1]),2)]
+        pointsMed = [finalCurves[i][2][f] for f in xrange(0,len(finalCurves[i][2]),1)]
+        poinsdPad = [finalCurves[i][3][f] for f in xrange(0,len(finalCurves[i][3]),1)]
+        
+        pylab.subplot(2,2,1)
+        pylab.plot(tP,pointsCurve,label=str(vals[i]))
+        pylab.subplot(2,2,2)
+        pylab.plot(tM,poinsdPad,label=str(vals[i]))
+        pylab.subplot(2,1,2) 
+        pylab.plot(tM,pointsMed,label=str(vals[i]))
+        
+    setPlotLegendAndRealCurve(tM,tP,len(pointsCurve),s)
+    
+    if showAndPlot:
+        pylab.show()
+        pylab.savefig(s+"/graph.png")
+    elif justShow:
+        pylab.show()
+    else:
+        pylab.savefig(s+"/graph.png")
+        pylab.savefig(s+"/graph.svg")
+
+def testMutation(useUniform):
+    vals = [1,2,5]
+    s="Mutation_Probability"
+    s=str(curveFinder.hBegin)+"_"+str(curveFinder.hEnd)+"/"+s
+    setStandardParameters()
+    
+    finalCurves=[]
+    
+    curveFinder.useUniform = useUniform
+    
+    for i in vals:
+        curveFinder.setMutationProb(i)
+        finalCurves.append(testAndReturnVals(s, i))
+        
+    tP = numpy.linspace(0, curveFinder.hEnd[0], num=(curveFinder.noPoints+2))
+    tM = numpy.linspace(1, curveFinder.getNumberGenerations(), num=curveFinder.getNumberGenerations())
+    
+    for i in xrange(len(vals)):
+        pointsCurve = [finalCurves[i][1][f] for f in xrange(1,len(finalCurves[i][1]),2)]
+        pointsMed = [finalCurves[i][2][f] for f in xrange(0,len(finalCurves[i][2]),1)]
+        poinsdPad = [finalCurves[i][3][f] for f in xrange(0,len(finalCurves[i][3]),1)]
+        
+        pylab.subplot(2,2,1)
+        pylab.plot(tP,pointsCurve,label=str(vals[i]))
+        pylab.subplot(2,2,2)
+        pylab.plot(tM,poinsdPad,label=str(vals[i]))
+        pylab.subplot(2,1,2) 
+        pylab.plot(tM,pointsMed,label=str(vals[i]))
+        
+    setPlotLegendAndRealCurve(tM,tP,len(pointsCurve),s)
+    
+    if showAndPlot:
+        pylab.show()
+        pylab.savefig(s+"/graph.png")
+    elif justShow:
+        pylab.show()
+    else:
+        pylab.savefig(s+"/graph.png")
+        pylab.savefig(s+"/graph.svg")
+
+def testElitism():
+    vals = [2,5,10,"Half","Offspring"]
+    s="Elitism"
+    s=str(curveFinder.hBegin)+"_"+str(curveFinder.hEnd)+"/"+s
+    setStandardParameters()
+    
+    finalCurves=[]
+    
+    for i in xrange(len(vals)-2):
+        curveFinder.setEliType(1)
+        curveFinder.setParentsElitismPerc(vals[i])
+        finalCurves.append(testAndReturnVals(s, vals[i]))
+        
+    ''' test Half Eli '''
+    curveFinder.setEliType(2)
+    finalCurves.append(testAndReturnVals(s, 'Half'))
+    
+    ''' test Offspring '''
+    curveFinder.setEliType(3)
+    finalCurves.append(testAndReturnVals(s, 'OffSpring'))
+        
+    tP = numpy.linspace(0, curveFinder.hEnd[0], num=(curveFinder.noPoints+2))
+    tM = numpy.linspace(1, curveFinder.getNumberGenerations(), num=curveFinder.getNumberGenerations())
+    
+    for i in xrange(len(vals)):
+        pointsCurve = [finalCurves[i][1][f] for f in xrange(1,len(finalCurves[i][1]),2)]
+        pointsMed = [finalCurves[i][2][f] for f in xrange(0,len(finalCurves[i][2]),1)]
+        poinsdPad = [finalCurves[i][3][f] for f in xrange(0,len(finalCurves[i][3]),1)]
+        
+        pylab.subplot(2,2,1)
+        pylab.plot(tP,pointsCurve,label=str(vals[i]))
+        pylab.subplot(2,2,2)
+        pylab.plot(tM,poinsdPad,label=str(vals[i]))
+        pylab.subplot(2,1,2) 
+        pylab.plot(tM,pointsMed,label=str(vals[i]))
+        
+    setPlotLegendAndRealCurve(tM,tP,len(pointsCurve),s)
+    
+    if showAndPlot:
+        pylab.show()
+        pylab.savefig(s+"/graph.png")
+        pylab.savefig(s+"/graph.svg")
+    elif justShow:
+        pylab.show()
+    else:
+        pylab.savefig(s+"/graph.png")
+        pylab.savefig(s+"/graph.svg")
+'''^^^^^^^^^^^^^^^^^^^^^^^ Parameter Test Functions ^^^^^^^^^^^^^^^^^^^^^^^^^^^^'''
+
+
+'''----------------------------- Aux Functions -----------------------------'''
+def testAndReturnVals(s,param):
+    global reps
+    
+    noGens = curveFinder.getNumberGenerations()
+    
+    bestFitIndAvg = [0 for _ in xrange(reps)]
+    
+    dpadAvg = [0 for _ in xrange(noGens)]
+    bestIndMinAvg = [0 for _ in xrange(noGens)]
+    bestIndMaxAvg = [0 for _ in xrange(noGens)]
+    bestIndMedAvg = [0 for _ in xrange(noGens)]
+    
+    seeds=0
+    
+    if not os.path.exists(s):
+        os.makedirs(s)
+    
+    fr = open(s+"/results_"+str(param)+".txt", 'w')
+    fa = open(s+"/resultsAvg.txt", 'a')
+    
+    bestUntilNow = ()
+    points = []
+    
+    for r in xrange(reps):
+        curveFinder.increaseSeeds(seeds)
+        seeds+=7
+        
+        returnValues = curveFinder.bestCurve()
+        
+        fr.write(str(r+1)+"\n")
+        json.dump(returnValues[0],fr)
+        fr.write("\n")
+        json.dump(returnValues[1],fr)
+        fr.write("\n")
+        json.dump(returnValues[2],fr)
+        fr.write("\n")
+        json.dump(returnValues[3],fr)
+        fr.write("\n")
+        json.dump(returnValues[4],fr)
+        fr.write("\n")
+        json.dump(returnValues[5],fr)
+        fr.write("\n\n")
+
+        bestFitIndAvg[r]+=returnValues[0]
+        
+        if bestFitIndAvg[r] < bestUntilNow:
+            points = returnValues[1]
+            bestUntilNow = bestFitIndAvg[r]
+        
+        for k in xrange(noGens):
+            bestIndMinAvg[k] += returnValues[2][k]
+            bestIndMedAvg[k] += returnValues[3][k] 
+            bestIndMaxAvg[k] += returnValues[4][k]             
+            dpadAvg[k] += returnValues[5][k]
+
+    for k in xrange(noGens):
+        bestIndMinAvg[k] /= reps*1.0
+        bestIndMedAvg[k] /= reps*1.0
+        bestIndMaxAvg[k] /= reps*1.0        
+        dpadAvg[k] /= reps*1.0
+
+    fa.write(str(param)+"\n")
+    json.dump(bestFitIndAvg,fa)
+    fa.write("\n")
+    json.dump(bestIndMinAvg,fa)
+    fa.write("\n")
+    json.dump(bestIndMedAvg,fa)
+    fa.write("\n")
+    json.dump(bestIndMaxAvg,fa)
+    fa.write("\n")
+    json.dump(dpadAvg,fa)
+    fa.write("\n")
+    json.dump(points,fa)
+    fa.write("\n\n")
+    
+    fr.close()
+    fa.close()
+    
+    return [param,points,bestIndMinAvg,dpadAvg]
+
+def setPlotLegendAndRealCurve(tM,tP,n,s):
+    _,pp = brachistochroneReal(curveFinder.hBegin[0],curveFinder.hBegin[1],curveFinder.hEnd[0],curveFinder.hEnd[1],n-1)
+    
+    fit = calcBrachTime(pp)
+    
+    pp=[pp[f] for f in xrange(1,len(pp),2)]
+    pylab.subplot(2,2,1)
+    
+    pylab.plot(tP,pp,label="real")
+    pylab.title(s)
+    pylab.subplot(2,2,2) 
+    pylab.title("Standard Deviation")
+    pylab.xlabel("Generations")
+    pylab.ylabel("Fitness")
+    pylab.subplot(2,1,2)
+    pylab.plot(tM,[fit for _ in xrange(curveFinder.getNumberGenerations())],label="real")
+    pylab.legend(loc='best',prop=FontProperties(size=9))
+    pylab.title("Best Fitness")
+    pylab.xlabel("Generations")
+    pylab.ylabel("Fitness")
+    
+'''^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Aux Functions ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'''
+    
+#testElitism()
+
+p1 = [[0,50],[1,0]]
+p2 = [[0,1],[50,0]]
+p3 = [[0,10],[10,0]]
+p4 = [[0,20],[20,19]]
+p5 = [[0,20],[20,10]]
+testPoints =[p1,p2,p3,p4,p5] 
+    
+for pt in testPoints:
+    curveFinder.hBegin = pt[0]
+    curveFinder.hEnd = pt[1]
+
+    testPopulationSize()
+    
+    testNoGens()
+    
+    testSelection()
+    
+    testXandY()
