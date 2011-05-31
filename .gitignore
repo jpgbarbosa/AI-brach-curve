@@ -1,0 +1,5 @@
+*.pyc
+Braquistocrona/.settings
+Braquistocrona/.project
+Braquistocrona/.pydevproject
+Braquistocrona/src/*.pyc
