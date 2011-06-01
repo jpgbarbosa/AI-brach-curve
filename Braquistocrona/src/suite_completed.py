@@ -106,8 +106,6 @@ def setStandardParameters():
     curveFinder.setCrossOverSizePerc(10)
     curveFinder.setParentsElitismPerc(5)
     
-    curveFinder.setStartPoint([0, 3])
-    curveFinder.setEndPoint([3, 1])
     curveFinder.plot=False
     curveFinder.printPopulation = False
     curveFinder.useXandY = False
@@ -153,7 +151,7 @@ def testPopulationSize():
         pylab.show()
     else:
         pylab.savefig(s+"/graph.png")
-        pylab.savefig(s+"/graph.svg")
+        pylab.savefig(s+"/graph.svg", format='svg')
 
 def testNoGens():
     
@@ -168,6 +166,7 @@ def testNoGens():
     finalCurves=[]
     
     for i in vals:
+        print i
         ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~CHANGE PARAMETERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
         curveFinder.setNumberGenerations(i)
         ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~CHANGE PARAMETERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
@@ -201,7 +200,7 @@ def testNoGens():
         pylab.show()
     else:
         pylab.savefig(s+"/graph.png")
-        pylab.savefig(s+"/graph.svg")
+        pylab.savefig(s+"/graph.svg", format='svg')
 
 def testSelection():
     
@@ -218,6 +217,7 @@ def testSelection():
     ''' use Tournament '''
     curveFinder.useSelectionParents = 1
     for i in vals:
+        print i
         ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~CHANGE PARAMETERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
         curveFinder.setSizeTournament(i)
         ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~CHANGE PARAMETERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
@@ -256,7 +256,7 @@ def testSelection():
         pylab.show()
     else:
         pylab.savefig(s+"/graph.png")
-        pylab.savefig(s+"/graph.svg")
+        pylab.savefig(s+"/graph.svg", format='svg')
 
 def testXandY():
     vals = ["Y","XandY"]
@@ -269,6 +269,7 @@ def testXandY():
     var = False
     
     for i in vals:
+        print i
         
         curveFinder.useXandY = var
         var = not var
@@ -299,7 +300,7 @@ def testXandY():
         pylab.show()
     else:
         pylab.savefig(s+"/graph.png")
-        pylab.savefig(s+"/graph.svg")
+        pylab.savefig(s+"/graph.svg", format='svg')
 
 def testCrossOverPoints():
     vals = [1,3,5]
@@ -312,6 +313,7 @@ def testCrossOverPoints():
     curveFinder.useCrossOverPercentage = False
     
     for i in vals:
+        print i
         curveFinder.setCrossOverSizePerc(i)
         finalCurves.append(testAndReturnVals(s, i))
         
@@ -339,7 +341,7 @@ def testCrossOverPoints():
         pylab.show()
     else:
         pylab.savefig(s+"/graph.png")
-        pylab.savefig(s+"/graph.svg")
+        pylab.savefig(s+"/graph.svg", format='svg')
         
     curveFinder.useCrossOverPercentage = True
 
@@ -352,6 +354,7 @@ def testCrossOverProb():
     finalCurves=[]
     
     for i in vals:
+        print i
         curveFinder.setCrossOverProb(i)
         finalCurves.append(testAndReturnVals(s, i))
         
@@ -379,7 +382,7 @@ def testCrossOverProb():
         pylab.show()
     else:
         pylab.savefig(s+"/graph.png")
-        pylab.savefig(s+"/graph.svg")
+        pylab.savefig(s+"/graph.svg", format='svg')
 
 def testMutation(useUniform):
     vals = [1,2,5]
@@ -392,6 +395,7 @@ def testMutation(useUniform):
     curveFinder.useUniform = useUniform
     
     for i in vals:
+        print i
         curveFinder.setMutationProb(i)
         finalCurves.append(testAndReturnVals(s, i))
         
@@ -419,7 +423,7 @@ def testMutation(useUniform):
         pylab.show()
     else:
         pylab.savefig(s+"/graph.png")
-        pylab.savefig(s+"/graph.svg")
+        pylab.savefig(s+"/graph.svg", format='svg')
 
 def testElitism():
     vals = [2,5,10,"Half","Offspring"]
@@ -454,7 +458,7 @@ def testElitism():
         pylab.plot(tP,pointsCurve,label=str(vals[i]))
         pylab.subplot(2,2,2)
         pylab.plot(tM,poinsdPad,label=str(vals[i]))
-        pylab.subplot(2,1,2) 
+        pylab.subplot(2,1,2)
         pylab.plot(tM,pointsMed,label=str(vals[i]))
         
     setPlotLegendAndRealCurve(tM,tP,len(pointsCurve),s)
@@ -467,7 +471,7 @@ def testElitism():
         pylab.show()
     else:
         pylab.savefig(s+"/graph.png")
-        pylab.savefig(s+"/graph.svg")
+        pylab.savefig(s+"/graph.svg", format='svg')
 '''^^^^^^^^^^^^^^^^^^^^^^^ Parameter Test Functions ^^^^^^^^^^^^^^^^^^^^^^^^^^^^'''
 
 
@@ -580,39 +584,104 @@ p2 = [[0,1],[50,0]]
 p3 = [[0,10],[10,0]]
 p4 = [[0,20],[20,19]]
 p5 = [[0,20],[20,10]]
-testPoints =[p1,p2,p3,p4,p5] 
+
+testPoints = [p5,p4,p3,p2,p1] 
+testPointsR = [p1,p2,p3,p4,p5] 
 
 reps = 30
 
-for pt in testPoints:
+for pt in testPointsR:
     curveFinder.hBegin = pt[0]
     curveFinder.hEnd = pt[1]
-
+    
+    pylab.clf()
     print "populationSize"
+    pylab.subplot(2,2,1)
+    pylab.cla()
+    pylab.subplot(2,2,2)
+    pylab.cla()
+    pylab.subplot(2,1,2)
+    pylab.cla()
     setStandardParameters()
     testPopulationSize()
+    pylab.clf()
     print "noGens"
+    pylab.subplot(2,2,1)
+    pylab.cla()
+    pylab.subplot(2,2,2)
+    pylab.cla()
+    pylab.subplot(2,1,2)
+    pylab.cla()    
     setStandardParameters()
     testNoGens()
+    pylab.clf()
     print "testSelection"
+    pylab.subplot(2,2,1)
+    pylab.cla()
+    pylab.subplot(2,2,2)
+    pylab.cla()
+    pylab.subplot(2,1,2)
+    pylab.cla()
     setStandardParameters()
     testSelection()
+    pylab.clf()
     print "XandY"
+    pylab.subplot(2,2,1)
+    pylab.cla()
+    pylab.subplot(2,2,2)
+    pylab.cla()
+    pylab.subplot(2,1,2)
+    pylab.cla()
     setStandardParameters()
     testXandY()
+    pylab.clf()
     print "CrossOverPoints"
+    pylab.subplot(2,2,1)
+    pylab.cla()
+    pylab.subplot(2,2,2)
+    pylab.cla()
+    pylab.subplot(2,1,2)
+    pylab.cla()
     setStandardParameters()
     testCrossOverPoints()
+    pylab.clf()
     print "CrossOverProb"
+    pylab.subplot(2,2,1)
+    pylab.cla()
+    pylab.subplot(2,2,2)
+    pylab.cla()
+    pylab.subplot(2,1,2)
+    pylab.cla()   
     setStandardParameters()
     testCrossOverProb()
     print "testMutationt"
+    pylab.subplot(2,2,1)
+    pylab.cla()
+    pylab.subplot(2,2,2)
+    pylab.cla()
+    pylab.subplot(2,1,2)
+    pylab.cla()   
     setStandardParameters()
     testMutation(True) #use UniformMutation
+    pylab.clf()
     print "testMutationF"
+    pylab.subplot(2,2,1)
+    pylab.cla()
+    pylab.subplot(2,2,2)
+    pylab.cla()
+    pylab.subplot(2,1,2)
+    pylab.cla()
     setStandardParameters()
     testMutation(False)
+    pylab.clf()
     print "Elitism" 
+    pylab.subplot(2,2,1)
+    pylab.cla()
+    pylab.subplot(2,2,2)
+    pylab.cla()
+    pylab.subplot(2,1,2)
+    pylab.cla()
     setStandardParameters()
     testElitism()
     print "end"
+
