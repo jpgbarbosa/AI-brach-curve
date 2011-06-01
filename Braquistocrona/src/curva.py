@@ -364,7 +364,7 @@ class BrachistochroneCurve():
         else:
             for i in xrange(3,self.noPoints*2+2,2):
                 if self.rM.random() < self.getMutationProb():
-                    x=ind.points[i]+self.rMnewPoint.gauss(0,(self.hEnd[1]-self.hEnd[0])/10)
+                    x=ind.points[i]+self.rMnewPoint.gauss(0,(self.hBegin[1]-self.hEnd[1])/10)
                     while x >= self.hBegin[1]:
                         x=ind.points[i]+self.rMnewPoint.gauss(0,(self.hEnd[1]-self.hEnd[0])/10)
                     ind.points[i] = x
