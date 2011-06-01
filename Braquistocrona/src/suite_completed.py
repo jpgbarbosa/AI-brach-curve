@@ -386,7 +386,13 @@ def testCrossOverProb():
 
 def testMutation(useUniform):
     vals = [1,2,5]
-    s="Mutation_Probability"
+    tempS=""
+    if useUniform :
+        tempS = "Normal"
+    else:
+        tempS = "Gauss"
+    
+    s="Mutation_Probability_"+tempS
     s=str(curveFinder.hBegin)+"_"+str(curveFinder.hEnd)+"/"+s
     setStandardParameters()
     
