@@ -13,7 +13,7 @@ global curveFinder, reps
 ''' show graph and save it to file '''
 showAndPlot = False
 ''' just show graphs '''
-justShow = False
+justShow = True
 
 reps=1
 
@@ -279,13 +279,22 @@ def testXandY():
     tP = numpy.linspace(0, curveFinder.hEnd[0], num=(curveFinder.noPoints+2))
     tM = numpy.linspace(1, curveFinder.getNumberGenerations(), num=curveFinder.getNumberGenerations())
     
+    
     for i in xrange(len(vals)):
-        pointsCurve = [finalCurves[i][1][f] for f in xrange(1,len(finalCurves[i][1]),2)]
+        if i==1:
+            pointsCurve = finalCurves[i][1]
+        else:
+            pointsCurve = [finalCurves[i][1][f] for f in xrange(1,len(finalCurves[i][1]),2)]
+            
         pointsMed = [finalCurves[i][2][f] for f in xrange(0,len(finalCurves[i][2]),1)]
         poinsdPad = [finalCurves[i][3][f] for f in xrange(0,len(finalCurves[i][3]),1)]
         
         pylab.subplot(2,2,1)
-        pylab.plot(tP,pointsCurve,label=str(vals[i]))
+        if i==1 :
+            pylab.plot(pointsCurve[0::2],pointsCurve[1::2],label=str(vals[i]))
+        else:
+            pylab.plot(tP,pointsCurve,label=str(vals[i]))
+        
         pylab.subplot(2,2,2)
         pylab.plot(tM,poinsdPad,label=str(vals[i]))
         pylab.subplot(2,1,2) 
@@ -567,15 +576,18 @@ def setPlotLegendAndRealCurve(tM,tP,n,s):
     
     fit = calcBrachTime(pp)
     
-    pp=[pp[f] for f in xrange(1,len(pp),2)]
+    xp = pp[0::2]
+    pp = pp[1::2]
     pylab.subplot(2,2,1)
     
-    pylab.plot(tP,pp,label="real")
+    xp[-1]=round(xp[-1])
+    pylab.plot(xp,pp,label="real")
+        
     pylab.title(s)
     pylab.subplot(2,2,2) 
     pylab.title("Standard Deviation")
     pylab.xlabel("Generations")
-    pylab.ylabel("Fitness")
+    pylab.ylabel("Time")
     pylab.subplot(2,1,2)
     pylab.plot(tM,[fit for _ in xrange(curveFinder.getNumberGenerations())],label="real")
     pylab.legend(loc='best',prop=FontProperties(size=9))
@@ -690,4 +702,3 @@ for pt in testPointsR:
     setStandardParameters()
     testElitism()
     print "end"
-
