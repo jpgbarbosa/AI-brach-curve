@@ -393,6 +393,9 @@ class BrachistochroneCurve():
             recPoints = int(self.getCrossOverSizePerc()*self.noPoints)
         else:
             recPoints = self.getCrossOverPoints()
+            if recPoints >= self.noPoints:
+                print "You are trying to use more crossover points than the available! recPoints set to zero."
+                recPoints = 0
     
         chosen = [-1 for i in xrange(recPoints)]
         num = 0

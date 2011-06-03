@@ -22,6 +22,7 @@ if __name__ == '__main__':
     curveFinder.setParentsElitismPerc(5)
     
     curveFinder.useCrossover = True
+    curveFinder.useCrossOverPercentage = True
     curveFinder.useMutation = True
     curveFinder.useSelectionParents = 1 #0- n usar 1- tournament 2- roulette
     curveFinder.useElitism = True

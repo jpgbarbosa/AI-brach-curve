@@ -13,7 +13,7 @@ global curveFinder, reps
 ''' show graph and save it to file '''
 showAndPlot = False
 ''' just show graphs '''
-justShow = True
+justShow = False
 
 reps=1
 
@@ -23,7 +23,6 @@ def firstTest():
     global curveFinder
         
     ''' radio buttons '''
-    curveFinder.useXandY = False
     curveFinder.eliType = 1
     curveFinder.useSelectionParents = 1
     
@@ -42,7 +41,7 @@ def firstTest():
     curveFinder.printPopulation = False
     curveFinder.plot=False
     curveFinder.useCrossOverPercentage = True
-    curveFinder.useXandY = False
+    curveFinder.useXandY = 0
     bestFitDiff = ()
     
     file=open("diffFits.txt",'w')
@@ -90,7 +89,7 @@ def setStandardParameters():
     global curveFinder
         
     ''' radio buttons '''
-    curveFinder.useXandY = False
+    curveFinder.useXandY = 1
     curveFinder.eliType = 1
     curveFinder.useSelectionParents = 1
     
@@ -106,10 +105,10 @@ def setStandardParameters():
     curveFinder.setCrossOverSizePerc(10)
     curveFinder.setParentsElitismPerc(5)
     
-    curveFinder.plot=False
+    curveFinder.plot = False
     curveFinder.printPopulation = False
-    curveFinder.useXandY = False
     
+    curveFinder.useUniform = True
     curveFinder.useCrossOverPercentage = True
 
 '''---------------------- Parameter Test Functions -----------------------------'''
@@ -265,35 +264,26 @@ def testXandY():
     setStandardParameters()
     
     finalCurves=[]
-    
-    var = False
-    
-    for i in vals:
-        print i
         
-        curveFinder.useXandY = var
-        var = not var
-        
-        finalCurves.append(testAndReturnVals(s, i))
+    curveFinder.useXandY = 0
+    finalCurves.append(testAndReturnVals(s, "Y"))
+    
+    curveFinder.useXandY = 1
+    finalCurves.append(testAndReturnVals(s, "XandY"))
         
     tP = numpy.linspace(0, curveFinder.hEnd[0], num=(curveFinder.noPoints+2))
     tM = numpy.linspace(1, curveFinder.getNumberGenerations(), num=curveFinder.getNumberGenerations())
     
     
     for i in xrange(len(vals)):
-        if i==1:
-            pointsCurve = finalCurves[i][1]
-        else:
-            pointsCurve = [finalCurves[i][1][f] for f in xrange(1,len(finalCurves[i][1]),2)]
+        pointsCurve = finalCurves[i][1]
             
         pointsMed = [finalCurves[i][2][f] for f in xrange(0,len(finalCurves[i][2]),1)]
         poinsdPad = [finalCurves[i][3][f] for f in xrange(0,len(finalCurves[i][3]),1)]
         
         pylab.subplot(2,2,1)
-        if i==1 :
-            pylab.plot(pointsCurve[0::2],pointsCurve[1::2],label=str(vals[i]))
-        else:
-            pylab.plot(tP,pointsCurve,label=str(vals[i]))
+        pylab.plot(pointsCurve[0::2],pointsCurve[1::2],label=str(vals[i]))
+
         
         pylab.subplot(2,2,2)
         pylab.plot(tM,poinsdPad,label=str(vals[i]))
@@ -602,13 +592,15 @@ p2 = [[0,1],[50,0]]
 p3 = [[0,10],[10,0]]
 p4 = [[0,20],[20,19]]
 p5 = [[0,20],[20,10]]
+p6 = [[0,3],[1,1]]
 
 testPoints = [p5,p4,p3,p2,p1] 
 testPointsR = [p1,p2,p3,p4,p5] 
+tempPoint = [p6]
 
 reps = 30
 
-for pt in testPointsR:
+for pt in tempPoint:
     curveFinder.hBegin = pt[0]
     curveFinder.hEnd = pt[1]
     
