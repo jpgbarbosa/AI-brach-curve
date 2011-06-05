@@ -36,17 +36,17 @@ class BrackGui(Tk):
         self.startHeightLabel.place(x=3,y=yInc+10)
         self.setHS = Spinbox(self, from_=0, to=100, width=4)
         self.setHS.place(x=70,y=yInc+10)
-        for _ in xrange(3):
+        for _ in xrange(10):
             self.setHS.invoke("buttonup")
         
         self.endHeightLabel = Label(self, text="End (x, y) ")
         self.endHeightLabel.place(x=3,y=yInc+40)
         self.setHEy = Spinbox(self, from_=0, to=100000,width=4)
         self.setHEy.place(x=113,y=yInc+40)
-        self.setHEy.invoke("buttonup")
         self.setHEx = Spinbox(self, from_=0, to=100000,width=4)
         self.setHEx.place(x=70,y=yInc+40)
-        self.setHEx.invoke("buttonup")     
+        for _ in xrange(10):
+            self.setHEx.invoke("buttonup")     
         
         self.noPointsLabel = Label(self, text="No. of Points:")
         self.noPointsLabel.place(x=240,y=yInc+10)
@@ -145,11 +145,19 @@ class BrackGui(Tk):
         self.elitismPerSel = Radiobutton(self, text="Elitism", variable=self.selEli, value=1, indicatoron=0, command = self.enablePercElitism)
         self.elitismPerSel.place(x=150, y=yInc+380)
         self.elitismPerSel.select()
-        self.elitismHalfSel = Radiobutton(self, width="16", text="Half", variable=self.selEli, value=2, indicatoron=0, command = self.enableHalf)
+        self.elitismHalfSel = Radiobutton(self, width="16", text="Steady State", variable=self.selEli, value=2, indicatoron=0, command = self.enableHalf)
         self.elitismHalfSel.place(x=250, y=yInc+380)
-        self.elitismOffSel = Radiobutton(self, width="16", text="Only Offsprings", variable=self.selEli, value=3, indicatoron=0, command = self.enableOffspring)
+        self.elitismOffSel = Radiobutton(self, width="16", text="Gerational", variable=self.selEli, value=3, indicatoron=0, command = self.enableOffspring)
         self.elitismOffSel.place(x=400, y=yInc+380)
     
+        self.varGaussCheck = IntVar()
+        self.curveFinder.useUniform = True
+        self.gaussCheck = Checkbutton(self, text="use Gaussian", variable=self.varGaussCheck, command = self.gaussCheck)
+        self.gaussCheck.place(x=10, y=yInc+425)
+        self.gaussCheck.deselect()
+
+    def gaussCheck(self):
+        self.curveFinder.useUniform = not self.curveFinder.useUniform
 
     def enableHalf(self):
         self.selEli.set(2)

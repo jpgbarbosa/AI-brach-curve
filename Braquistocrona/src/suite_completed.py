@@ -89,7 +89,7 @@ def setStandardParameters():
     global curveFinder
         
     ''' radio buttons '''
-    curveFinder.useXandY = 1
+    curveFinder.useXandY = 0
     curveFinder.eliType = 1
     curveFinder.useSelectionParents = 1
     
@@ -110,6 +110,8 @@ def setStandardParameters():
     
     curveFinder.useUniform = True
     curveFinder.useCrossOverPercentage = True
+    
+    curveFinder.increaseSeeds(0)
 
 '''---------------------- Parameter Test Functions -----------------------------'''
 def testPopulationSize():
@@ -477,6 +479,48 @@ def testElitism():
     else:
         pylab.savefig(s+"/graph.png")
         pylab.savefig(s+"/graph.svg", format='svg')
+        
+
+def testNoPoints():
+    vals = [10,20,30,50]
+    s="number_points"
+    s=str(curveFinder.hBegin)+"_"+str(curveFinder.hEnd)+"/"+s
+    setStandardParameters()
+    
+    finalCurves=[]
+    
+    for i in vals:
+        print i
+        curveFinder.setNoPoints(i)
+        finalCurves.append(testAndReturnVals(s, i))
+        
+    tP = numpy.linspace(0, curveFinder.hEnd[0], num=(curveFinder.noPoints+2))
+    tM = numpy.linspace(1, curveFinder.getNumberGenerations(), num=curveFinder.getNumberGenerations())
+    
+    for i in xrange(len(vals)):
+        #pointsCurve = [finalCurves[i][1][f] for f in xrange(1,len(finalCurves[i][1]),2)]
+        pointsCurve = finalCurves[i][1][1::2]
+        tP = finalCurves[i][1][0::2]
+        pointsMed = [finalCurves[i][2][f] for f in xrange(0,len(finalCurves[i][2]),1)]
+        poinsdPad = [finalCurves[i][3][f] for f in xrange(0,len(finalCurves[i][3]),1)]
+        
+        pylab.subplot(2,2,1)
+        pylab.plot(tP,pointsCurve,label=str(vals[i]))
+        pylab.subplot(2,2,2)
+        pylab.plot(tM,poinsdPad,label=str(vals[i]))
+        pylab.subplot(2,1,2) 
+        pylab.plot(tM,pointsMed,label=str(vals[i]))
+        
+    setPlotLegendAndRealCurve(tM,tP,len(pointsCurve),s)
+    
+    if showAndPlot:
+        pylab.show()
+        pylab.savefig(s+"/graph.png")
+    elif justShow:
+        pylab.show()
+    else:
+        pylab.savefig(s+"/graph.png")
+        pylab.savefig(s+"/graph.svg", format='svg')
 '''^^^^^^^^^^^^^^^^^^^^^^^ Parameter Test Functions ^^^^^^^^^^^^^^^^^^^^^^^^^^^^'''
 
 
@@ -594,16 +638,23 @@ p4 = [[0,20],[20,19]]
 p5 = [[0,20],[20,10]]
 p6 = [[0,3],[1,1]]
 
-testPoints = [p5,p4,p3,p2,p1] 
-testPointsR = [p1,p2,p3,p4,p5] 
-tempPoint = [p6]
-
+testPoints = [p1,p2,p3,p4,p5,p6]
 reps = 30
 
-for pt in tempPoint:
+for pt in testPoints:
     curveFinder.hBegin = pt[0]
     curveFinder.hEnd = pt[1]
     
+    pylab.clf()
+    print "noPoints"
+    pylab.subplot(2,2,1)
+    pylab.cla()
+    pylab.subplot(2,2,2)
+    pylab.cla()
+    pylab.subplot(2,1,2)
+    pylab.cla()
+    setStandardParameters()
+    testNoPoints()
     pylab.clf()
     print "populationSize"
     pylab.subplot(2,2,1)

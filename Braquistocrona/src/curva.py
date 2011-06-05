@@ -175,22 +175,16 @@ class BrachistochroneCurve():
             print "The answer is obvious. The ball can't get there..."
             return;
 
-        #print "Has started..."
         self.createPopulation()
-        self.plotMin=[]#[0 for _ in xrange(self.numberGenerations)]
-        self.plotMax=[]#[0 for _ in xrange(self.numberGenerations)]
-        self.plotMed=[]#[0 for _ in xrange(self.numberGenerations)]
+        self.plotMin=[]
+        self.plotMax=[]
+        self.plotMed=[]
         
         self.retMin = []
         self.retMax = []
         self.retMed = []
         self.retStDev = []
         
-        '''
-        x=arange(self.currentGeneration)
-        line=pylab.plot(x,plotMed,'r-',x,plotMin,'g-',x,plotMax,'g-')
-        pylab.show()
-        '''
         # Starts the algorithm itself for a given number of generations.
         for i in xrange(self.numberGenerations):
             self.currentGeneration = i
@@ -222,9 +216,7 @@ class BrachistochroneCurve():
                 # We have to select two parents to the crossover.
                 parentOne = None
                 parentTwo = None
-                
-                #useSelection = 2
-                
+                                
                 if(self.useSelectionParents == 1):
                     # Select parents by tournament selection.
                     parentOne = self.tournamentSelection()
@@ -299,20 +291,6 @@ class BrachistochroneCurve():
         tournament.sort(key = attrgetter('fitness'))
         #Returns the best individual.
         return tournament[0]
-
-    """def rouletteWheelSelection( self ):
-        totalFitness = 0
-        
-        for member in self.population:
-            totalFitness += (1/(member.fitness))
-             
-        relFitness = [(1/f.fitness)/totalFitness for f in self.population]
-        # Generate probability intervals for each individual
-        probs = [sum(relFitness[:i+1]) for i in xrange(self.sizePopulation)]
-        
-        for (i, individual) in enumerate(self.population):
-            if self.rRWS.random() <= probs[i]:
-                return individual"""
     
     def rouletteWheelSelection( self ):
         # We have already calculated  the total fitness and the partial
@@ -350,13 +328,11 @@ class BrachistochroneCurve():
         
     #Mutation in percentagePoints
     def mutation(self, ind):
-        #TODO: gaussiana
         
         if(self.useUniform):
             for i in xrange(3,self.noPoints*2+2,2):
                 if self.rM.random() < self.getMutationProb():
                     # Mutates the y coordiante.
-                    #TODO: check if this is correct
                     ind.points[i] = self.rMnewPoint.uniform(self.hEnd[1]-self.hEnd[0]/2,self.hBegin[1])
                     if self.useXandY==1:
                         # Mutates the x coordinate. The minimum distance will be EPSLON.
@@ -366,19 +342,13 @@ class BrachistochroneCurve():
                 if self.rM.random() < self.getMutationProb():
                     x=ind.points[i]+self.rMnewPoint.gauss(0,(self.hBegin[1]-self.hEnd[1])/10)
                     while x >= self.hBegin[1]:
-                        x=ind.points[i]+self.rMnewPoint.gauss(0,(self.hEnd[1]-self.hEnd[0])/10)
+                        x=ind.points[i]+self.rMnewPoint.gauss(0,(self.hBegin[1]-self.hEnd[1])/10)
                     ind.points[i] = x
+                    if self.useXandY==1:
+                        # Mutates the x coordinate. The minimum distance will be EPSLON.
+                        ind.points[i-1] = (ind.points[i+1] - ind.points[i-3] - 2*EPSLON)*self.rMnewPoint.random() + ind.points[i-3] + EPSLON
             pass
-        '''
-        npoints = int(self.getMutationPerc() * self.noPoints)
-        
-        for _ in xrange(npoints):
-            point = randint(0,self.noPoints - 1)*2+3
-            # We can only have values smaller than the initial height.                
-            ind.points[point] = random()*self.hBegin[1]
-        
-        '''
-        
+
         return ind
         
 
@@ -487,8 +457,7 @@ class BrachistochroneCurve():
         
         return min,max
 
-    #Sort the individual by the x coordinate
-    
+    #Sort the individual by the x coordinate 
     def xCoordSelectionSortInd(self, individual):
         
         for x in range(2, (self.noPoints+2)*2,2):

@@ -10,6 +10,7 @@ import pylab
 
 global curveFinder, reps
 
+
 ''' show graph and save it to file '''
 showAndPlot = False
 ''' just show graphs '''
@@ -90,7 +91,7 @@ def setStandardParameters():
     global curveFinder
         
     ''' radio buttons '''
-    curveFinder.useXandY = False
+    curveFinder.useXandY = 0
     curveFinder.eliType = 1
     curveFinder.useSelectionParents = 1
     
@@ -156,7 +157,6 @@ def testPopulationSize():
         pylab.savefig(s+"/graph.svg", format='svg')
 
 def testNoGens(ext,vals=None):
-    
     ''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~CHANGE PARAMETERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '''
     if vals == None:
         vals = [10,20,50,100,250,500]
@@ -197,7 +197,7 @@ def testNoGens(ext,vals=None):
         pylab.plot(tM,pointsMed,label=str(vals[i]))
         
     setPlotLegendAndRealCurve(tM,tP,len(pointsCurve),s)
-    
+
     if showAndPlot:
         pylab.show()
         pylab.savefig(s+"/graph.svg")
@@ -492,6 +492,46 @@ def testElitism():
     else:
         pylab.savefig(s+"/graph.png")
         pylab.savefig(s+"/graph.svg", format='svg')
+        
+def testNoPoints():
+    vals = [20,50]
+    s="number_points_10kgen"
+    s=str(curveFinder.hBegin)+"_"+str(curveFinder.hEnd)+"/"+s
+
+    finalCurves=[]
+    
+    for i in vals:
+        print i
+        curveFinder.setNoPoints(i)
+        finalCurves.append(testAndReturnVals(s, i))
+        
+    tP = numpy.linspace(0, curveFinder.hEnd[0], num=(curveFinder.noPoints+2))
+    tM = numpy.linspace(1, curveFinder.getNumberGenerations(), num=curveFinder.getNumberGenerations())
+    
+    for i in xrange(len(vals)):
+        #pointsCurve = [finalCurves[i][1][f] for f in xrange(1,len(finalCurves[i][1]),2)]
+        pointsCurve = finalCurves[i][1][1::2]
+        tP = finalCurves[i][1][0::2]
+        pointsMed = [finalCurves[i][2][f] for f in xrange(0,len(finalCurves[i][2]),1)]
+        poinsdPad = [finalCurves[i][3][f] for f in xrange(0,len(finalCurves[i][3]),1)]
+        
+        pylab.subplot(2,2,1)
+        pylab.plot(tP,pointsCurve,label=str(vals[i]))
+        pylab.subplot(2,2,2)
+        pylab.plot(tM,poinsdPad,label=str(vals[i]))
+        pylab.subplot(2,1,2) 
+        pylab.plot(tM,pointsMed,label=str(vals[i]))
+        
+    setPlotLegendAndRealCurve(tM,tP,len(pointsCurve),s)
+    
+    if showAndPlot:
+        pylab.show()
+        pylab.savefig(s+"/graph.png")
+    elif justShow:
+        pylab.show()
+    else:
+        pylab.savefig(s+"/graph.png")
+        pylab.savefig(s+"/graph.svg", format='svg')
 '''^^^^^^^^^^^^^^^^^^^^^^^ Parameter Test Functions ^^^^^^^^^^^^^^^^^^^^^^^^^^^^'''
 
 
@@ -608,18 +648,11 @@ def testSameH(point,s):
     
     reps=30
     
-    pylab.clf()
     print s
-    pylab.subplot(2,2,1)
-    pylab.cla()
-    pylab.subplot(2,2,2)
-    pylab.cla()
-    pylab.subplot(2,1,2)
-    pylab.cla()
     
     curveFinder.hBegin = point[0]
     curveFinder.hEnd = point[1]
-    testNoGens(s,[500,1000,10000])
+    testNoGens(s,[500,10000])
 
 
 p1 = [[0,50],[1,0]]
@@ -627,18 +660,39 @@ p2 = [[0,1],[50,0]]
 p3 = [[0,10],[10,0]]
 p4 = [[0,20],[20,19]]
 p5 = [[0,20],[20,10]]
+p6 = [[0,3],[1,1]]
 
 testPoints = [p5,p4,p3,p2,p1] 
-testPointsR = [p1,p2,p3,p4,p5] 
+testPointsR = [p4,p5,p6]#[p3,p2,p1, 
 
 reps = 30
 
-var=1
+var=3
 
 if var == 1:
     setStandardParameters()
     testSameH(p5,'_ext_gauss')
-else:
+elif var == 2:
     setStandardParameters()
     curveFinder.useUniform =  True
-    testSameH(p5,'_ext_normal')
+    curveFinder.setNoPoints(50)
+    testNoPoints()
+    #testSameH(p3,'_ext_50p')
+elif var == 3:
+    for pt in testPointsR:
+        curveFinder.hBegin = pt[0]
+        curveFinder.hEnd = pt[1]
+        
+        pylab.clf()
+        print "noPoints"
+        pylab.subplot(2,2,1)
+        pylab.cla()
+        pylab.subplot(2,2,2)
+        pylab.cla()
+        pylab.subplot(2,1,2)
+        pylab.cla()
+        setStandardParameters()
+        curveFinder.setNumberGenerations(5000)
+        curveFinder.useUniform =  True
+        curveFinder.setNoPoints(50)
+        testNoPoints()
